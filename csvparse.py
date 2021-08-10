@@ -23,7 +23,7 @@ c.csv(CLIENT_NAME + '_Quote.pdf', CLIENT_NAME + '_Quote.csv')
 
 #docusign parsing
 rows_to_skip = 19;
-with open('/content/' + CLIENT_NAME + '_Quote.csv') as csv_file:
+with open(CLIENT_NAME + '_Quote.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
       current_row = row;
@@ -202,7 +202,7 @@ if(not options[surcharge_index+1] == "nan"):
 header = ["Category", "Feature", "Option", "Variant", "Description", "Quantity", "Ext. Price", "Description Notes ->"]
 
 # open the file in the write mode
-f = open('/content/' + CLIENT_NAME + '_Quote_Processed.csv', 'w')
+f = open(CLIENT_NAME + '_Quote_Processed.csv', 'w')
 
 # create the csv writer
 writer = csv.writer(f)
@@ -215,11 +215,3 @@ for row in change_array:
 
 # close the file
 f.close()
-
-#pip install tabula-py
-
-#import tabula
-
-# df = tabula.read_pdf("/content/Sterba_Quote.pdf", pages='all')
-#tabula.convert_into("/content/Sterba_Quote.pdf", "/content/Sterba_Quote2.csv", output_format="csv", pages='all')
-
