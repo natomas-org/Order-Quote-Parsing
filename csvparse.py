@@ -234,7 +234,7 @@ for i in meta_indices:
   meta_array.append(row);
 
 # open the file in the write mode
-f = open('/content/' + CLIENT_NAME + '_Quote_Processed.csv', 'w')
+f = open(CLIENT_NAME + '_Quote_Processed.csv', 'w')
 
 # create the csv writer
 writer = csv.writer(f)
