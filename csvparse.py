@@ -41,7 +41,7 @@ header_names = header_names_important + header_names_arbitrary
 
 
 #Data Import
-original_file_name = '/content/' + CLIENT_NAME + '_Quote.csv';
+original_file_name = CLIENT_NAME + '_Quote.csv';
 df = pd.read_csv(original_file_name,delimiter=',', header = None, names = header_names, skiprows=rows_to_skip, engine = 'python');
 total_categories = ["Miscellaneous", "Construction", "Frame", "Floor", "Floor Covering", "Plumbing/Heating", "Utility Room", "Electrical", "Walls", "Roof", "Exterior", "Exterior Doors", "Windows", "Cabinets", "Cabinet Doors", "Countertop", "Backsplash", "Appliances", "Kitchen", "Master Bath", "Second Bath", "Lighting", "Interior", "Interior Doors", "Program & Fees", "Shipped Loose Material", "Window Covering", "Inflation Protection Plan", "MISCELLANEOUS CHARGES"];
 
@@ -101,7 +101,7 @@ for i in range(1,len(features)):
 for i in indices:
   if(features[i] == "SURCHARGE"):
     surcharge_index = i;
-for i in range(surcharge_index+1, surcharge_index+15):
+for i in range(surcharge_index+1, surcharge_index+10):
   if("OP" in options[i] or "SP" in options[i]):
     surcharge_index = i;
 feature_indices = [x for x in indices if x <= surcharge_index];
@@ -120,7 +120,7 @@ for i in indices:
 #this code will rectify that by first identifying each troublesome row:
 kuo_indices = [];
 for i in feature_indices:
-  if(quantities[i] == "nan" and prices[i] == "nan"):
+  if((quantities[i] == "nan" or '"' in quantities[i] or "-" in quantities[i]) and prices[i] == "nan"):
     kuo_indices.append(i);
 # next I have to iterate through each index, and find the first index in the row after index 7 that contains some non empty string, 
 # and setting that to the quantity of that row, and finding the second non empty string and setting that to the price of each row
@@ -195,20 +195,56 @@ for row in change_array:
   if(row[4] == "nan"):
     row[4] = row[3];
     row[3] = "N/A";
+  if('"' in row[5] or "-" in row[5]):
+    row[5] = "1"
 
 if(not options[surcharge_index+1] == "nan"):
   change_array[len(change_array)-1].append(options[surcharge_index+1]);
 
 header = ["Category", "Feature", "Option", "Variant", "Description", "Quantity", "Ext. Price", "Description Notes ->"]
 
+#now lets work on importing the metadata of the quote and displaying that in a way that makes sense
+meta_skip = rows_to_skip - 16;
+meta_headers_int = range(0,50);
+meta_headers = []
+for x in meta_headers_int:
+  meta_headers.append(str(x));
+header_df = pd.read_csv(original_file_name,delimiter=',', header = None, names = meta_headers, skiprows=meta_skip, engine = 'python');
+
+meta_category_raw = header_df["4"];
+meta_category = [];
+for mc in meta_category_raw:
+  meta_category.append(str(mc));
+
+meta_data_raw = header_df['5'];
+meta_data = [];
+for md in meta_data_raw:
+  meta_data.append(str(md));
+
+meta_final_index = 0;
+for i in range(0,len(meta_category)):
+  if meta_category[i] == "nan" and meta_final_index == 0:
+    meta_final_index = i;
+
+meta_indices = range(0,meta_final_index);
+
+meta_array = [];
+for i in meta_indices:
+  row = [meta_category[i], meta_data[i]];
+  meta_array.append(row);
+
 # open the file in the write mode
-f = open(CLIENT_NAME + '_Quote_Processed.csv', 'w')
+f = open('/content/' + CLIENT_NAME + '_Quote_Processed.csv', 'w')
 
 # create the csv writer
 writer = csv.writer(f)
 
 # write a row to the csv file
 writer.writerow(header)
+for row in meta_array:
+  writer.writerow(row);
+writer.writerow("");
+writer.writerow("");
 for row in change_array:
   writer.writerow(row);
 
